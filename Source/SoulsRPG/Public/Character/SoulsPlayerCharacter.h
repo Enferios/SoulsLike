@@ -21,6 +21,9 @@ class SOULSRPG_API ASoulsPlayerCharacter : public ASoulsBaseCharacter
 public:
 
 	ASoulsPlayerCharacter();
+
+	float TurnRate;
+	float LookUpRate;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArm;
@@ -30,5 +33,14 @@ public:
 
 
 public:
-	
+	void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	void MoveForward(float AxisValue);
+	void MoveRight(float AxisValue);
+
+	/** Uses for rotate spring arm around character */
+	void LookUp(float AxisValue);
+
+	/** Uses for rotate spring arm around character */
+	void Turn(float AxisValue);
 };
