@@ -4,7 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "SoulsBaseCharacter.generated.h"
+
+class UHumanAnimInstance;
+class USceneComponent;
+class UCharacterStatsComponent;
+class UAnimMontage;
 
 UCLASS()
 class SOULSRPG_API ASoulsBaseCharacter : public ACharacter
@@ -14,6 +20,32 @@ class SOULSRPG_API ASoulsBaseCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ASoulsBaseCharacter();
+
+	bool bIsAttacking;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsHeavyAttackCharged;
+
+	UPROPERTY(ReplicatedUsing = OnRep_bIsRolling)
+	bool bIsRolling;
+
+	UPROPERTY(ReplicatedUsing = OnRep_bIsSprinting)
+	bool bIsSprinting;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	UHumanAnimInstance* AnimInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	USceneComponent* TwoHandedWeaponEquipSocket;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	USceneComponent* TwoHandedWeaponHandSocket;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UCharacterStatsComponent* CharacterStats;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* DeathMontage;
 
 protected:
 	// Called when the game starts or when spawned
@@ -25,5 +57,25 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Character | Combat")
+	void Server_SetIsAttackCharged(bool IsCharged);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Character | Combat")
+	void Server_AttackEnd();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Character | Combat")
+	void Server_RollEnd();
+
+	UFUNCTION()
+	void OnRep_bIsSprinting();
+
+	UFUNCTION()
+	void OnRep_bIsRolling();
+
+	UFUNCTION()
+	virtual void Death();
 
 };

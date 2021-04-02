@@ -79,6 +79,7 @@ DerivedDataCache/*
 
 *.uasset
 *.umap
+!Content/SoulsRPG/Blueprints/**/*.uasset
 
 ### UnrealEngine Patch ###
 # Don't ignore icon and splash images for mobile app
