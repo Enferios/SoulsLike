@@ -40,4 +40,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void DisableAttackCollision();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void EquipWeaponNotify();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void UnequipWeaponNotify();
 };

@@ -97,6 +97,7 @@ void ASoulsPlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty
 
     DOREPLIFETIME(ASoulsPlayerCharacter, EquippedItems);
     DOREPLIFETIME(ASoulsPlayerCharacter, WeaponMode);
+    DOREPLIFETIME(ASoulsPlayerCharacter, bIsMoving);
 }
 
 void ASoulsPlayerCharacter::MoveForward(float AxisValue)
@@ -111,6 +112,8 @@ void ASoulsPlayerCharacter::MoveForward(float AxisValue)
 
         AddMovementInput(Direction, AxisValue);
     }
+
+    Server_CheckIsMoving();
 }
 
 void ASoulsPlayerCharacter::MoveRight(float AxisValue)
@@ -331,6 +334,8 @@ void ASoulsPlayerCharacter::EquipItem_Implementation(const FItemInfo& Item)
         EquippedItems.MainWeapon->AttachToComponent(TwoHandedWeaponEquipSocket, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
         EquippedItems.MainWeapon->ItemInfo = Item;
         EquippedItems.MainWeapon->ItemOwner = this;
+
+        Multicast_PlayMontage(GetMesh(), PickupMontage);
     }
     else
         UE_LOG(LogTemp, Error, TEXT("Item class for creating is not valid!"
@@ -364,27 +369,13 @@ void ASoulsPlayerCharacter::Server_TryDrawWeapon_Implementation()
     if (EquippedItems.MainWeapon == nullptr)
         return;
 
-    WeaponMode = ECharacterWeaponMode::CWM_Longsword;
-
-    Multicast_PlayMontage(GetMesh(), WeaponDrawMontage, "Draw");
-    if (EquippedItems.MainWeapon)
-    {
-        EquippedItems.MainWeapon->AttachToComponent(TwoHandedWeaponHandSocket, 
-            FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-    }
+    Multicast_PlayMontage(GetMesh(), WeaponDrawMontage, "Equip");
 }
 
 void ASoulsPlayerCharacter::Server_TrySheathWeapon_Implementation()
 {
-    WeaponMode = ECharacterWeaponMode::CWM_None;
 
-    Multicast_PlayMontage(GetMesh(), WeaponDrawMontage, "Sheath");
-
-    if (EquippedItems.MainWeapon)
-    {
-        EquippedItems.MainWeapon->AttachToComponent(TwoHandedWeaponEquipSocket,
-            FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-    }
+    Multicast_PlayMontage(GetMesh(), WeaponDrawMontage, "Unequip");
 }
 
 
@@ -398,3 +389,41 @@ void ASoulsPlayerCharacter::Death()
     }
 }
 
+void ASoulsPlayerCharacter::OnRep_IsMoving()
+{
+    AnimInstance->bIsMoving = bIsMoving;
+}
+
+void ASoulsPlayerCharacter::Server_CheckIsMoving_Implementation()
+{
+    FVector CurrentVelocity = GetCharacterMovement()->GetLastUpdateVelocity();
+    bIsMoving = CurrentVelocity.Size() > 0.f;
+}
+
+void ASoulsPlayerCharacter::EquipWeaponNotify_Implementation()
+{
+    Server_TrySetWeaponMode(ECharacterWeaponMode::CWM_Longsword);
+}
+
+void ASoulsPlayerCharacter::UnequipWeaponNotify_Implementation()
+{
+    Server_TrySetWeaponMode(ECharacterWeaponMode::CWM_None);
+}
+
+void ASoulsPlayerCharacter::Server_TrySetWeaponMode_Implementation(ECharacterWeaponMode NewMode)
+{
+    WeaponMode = NewMode;
+
+    switch (WeaponMode)
+    {
+        case ECharacterWeaponMode::CWM_Longsword:
+            EquippedItems.MainWeapon->AttachToComponent(TwoHandedWeaponHandSocket,
+                 FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            break;
+        case ECharacterWeaponMode::CWM_None:
+            EquippedItems.MainWeapon->AttachToComponent(TwoHandedWeaponEquipSocket,
+                                FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+            break;
+    }
+
+}

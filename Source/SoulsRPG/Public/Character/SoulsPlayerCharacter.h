@@ -33,6 +33,9 @@ public:
 	bool bMovementEnabled;
 	bool bInputEnabled;
 
+	UPROPERTY(ReplicatedUsing = OnRep_IsMoving, BlueprintReadOnly)
+	bool bIsMoving;
+
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponMode, VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	ECharacterWeaponMode WeaponMode;
 
@@ -44,6 +47,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* PickupMontage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* RollingMontage;
@@ -153,4 +159,19 @@ public:
 	void DisableAttackCollision_Implementation();
 
 	void Death() override;
+
+	UFUNCTION()
+	void OnRep_IsMoving();
+
+	UFUNCTION(Server, Reliable)
+	void Server_CheckIsMoving();
+
+	void EquipWeaponNotify();
+	void EquipWeaponNotify_Implementation();
+
+	void UnequipWeaponNotify();
+	void UnequipWeaponNotify_Implementation();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_TrySetWeaponMode(ECharacterWeaponMode NewMode);
 };

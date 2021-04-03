@@ -27,6 +27,9 @@ public:
 	UHumanAnimInstance();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation | Movement")
+	bool bIsMoving;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation | Movement")
 	bool bIsFalling;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation | Movement")
@@ -40,9 +43,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation | Movement")
 	float Velocity;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation | Movement")
-	float CurrentAcceleration;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation | References")
 	ASoulsBaseCharacter* Character;
@@ -59,4 +59,11 @@ public:
 
 	void DisableAttackCollision();
 	void DisableAttackCollision_Implementation();
+
+	void EquipWeapon();
+	void EquipWeapon_Implementation();
+	void UnequipWeapon();
+	void UnequipWeapon_Implementation();
+
+	bool CheckIsMoving();
 };

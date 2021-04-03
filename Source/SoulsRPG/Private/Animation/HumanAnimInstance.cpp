@@ -21,7 +21,6 @@ void UHumanAnimInstance::UpdateAnimationProperties()
 	if (Character)
 	{
 		Velocity = Character->GetVelocity().Size();
-		CurrentAcceleration = Character->GetCharacterMovement()->GetCurrentAcceleration().Size();
 
 		bIsFalling = Character->GetCharacterMovement()->IsFalling();
 	}
@@ -43,3 +42,25 @@ void UHumanAnimInstance::DisableAttackCollision_Implementation()
 	}
 }
 
+bool UHumanAnimInstance::CheckIsMoving()
+{
+	float LastInputVectorLength = Character->GetCharacterMovement()->GetLastInputVector().Size();
+
+	return LastInputVectorLength > 0.f;
+}
+
+void UHumanAnimInstance::EquipWeapon_Implementation()
+{
+	if (Character)
+	{
+		IPlayerCharacterInterface::Execute_EquipWeaponNotify(Character);
+	}
+}
+
+void UHumanAnimInstance::UnequipWeapon_Implementation()
+{
+	if (Character)
+	{
+		IPlayerCharacterInterface::Execute_UnequipWeaponNotify(Character);
+	}
+}

@@ -74,6 +74,7 @@ void AMaster_Pickup::EndFocused_Implementation()
 void AMaster_Pickup::Interact_Implementation(AActor* Interactor)
 {
 	IPlayerCharacterInterface::Execute_EquipItem(Interactor, ItemInfo);
+	SetLifeSpan(0.3f);
 }
 
 FText AMaster_Pickup::GetInteractableName_Implemetation()
