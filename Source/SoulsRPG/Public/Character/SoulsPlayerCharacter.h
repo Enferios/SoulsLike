@@ -118,10 +118,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_TryRolling();
 
-	/** Uses for playing animation montages on all clients */
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayMontage(USkeletalMeshComponent* MeshToPlay, UAnimMontage* Montage, 
-									FName Section = "None");
+	
 	UFUNCTION(Server, Reliable)
 	void Server_TryChargeAttack();
 

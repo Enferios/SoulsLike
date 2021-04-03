@@ -56,6 +56,20 @@ void ASoulsBaseCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>&
 	DOREPLIFETIME(ASoulsBaseCharacter, bIsRolling);
 }
 
+// TODO make mesh implemented inside the function instead
+void ASoulsBaseCharacter::Multicast_PlayMontage_Implementation(USkeletalMeshComponent* MeshToPlay,
+										UAnimMontage* Montage, FName Section)
+{
+	if (MeshToPlay == nullptr || Montage == nullptr)
+		return;
+
+	MeshToPlay->GetAnimInstance()->Montage_Play(Montage);
+	if (Section != "None")
+	{
+		MeshToPlay->GetAnimInstance()->Montage_JumpToSection(Section);
+	}
+}
+
 void ASoulsBaseCharacter::Server_SetIsAttackCharged_Implementation(bool IsCharged)
 {
 	bIsHeavyAttackCharged = IsCharged;

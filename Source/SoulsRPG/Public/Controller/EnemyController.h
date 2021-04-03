@@ -4,14 +4,47 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+
+#include "Controller/EnemyControllerInterface.h"
+
 #include "EnemyController.generated.h"
 
 /**
  * 
  */
+class UBehaviorTree;
+
 UCLASS()
-class SOULSRPG_API AEnemyController : public AAIController
+class SOULSRPG_API AEnemyController : public AAIController,
+	public IEnemyControllerInterface
 {
 	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI | Behavior Tree")
+	UBehaviorTree* BehaviorTree;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI | Combat")
+	AActor* CurrentTarget;
+
+public:
+
+	void SetTarget(AActor* NewTarget);
+	void SetTarget_Implementation(AActor* NewTarget);
+
+	void ClearTarget();
+
+	void Attack();
+	void Attack_Implementation();
+
+protected:
+
+	void BeginPlay() override;
+
+	void Tick(float DeltaSeconds) override;
+
+	void LookAtTarget();
 	
+
 };

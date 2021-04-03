@@ -60,6 +60,11 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	/** Uses for playing animation montages on all clients */
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	void Multicast_PlayMontage(USkeletalMeshComponent* MeshToPlay, UAnimMontage* Montage,
+										FName Section = "None");
+
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Character | Combat")
 	void Server_SetIsAttackCharged(bool IsCharged);
 

@@ -22,4 +22,11 @@ class SOULSRPG_API IEnemyControllerInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Enemy Controller Interface")
+	void SetTarget(AActor* NewTarget);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Enemy Controller Interface")
+	void Attack();
+
 };

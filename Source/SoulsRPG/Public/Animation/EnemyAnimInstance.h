@@ -13,5 +13,16 @@ UCLASS()
 class SOULSRPG_API UEnemyAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-	
+public:
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation | Movement")
+	float Velocity;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation | Reference")
+	APawn* PawnOwner;
+
+protected:
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateAnimationProperties();
 };

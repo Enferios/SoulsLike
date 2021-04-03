@@ -249,19 +249,7 @@ void ASoulsPlayerCharacter::Server_TryRolling_Implementation()
     }
 }
 
-// TODO make mesh implemented inside the function instead
-void ASoulsPlayerCharacter::Multicast_PlayMontage_Implementation(USkeletalMeshComponent* MeshToPlay,
-                                        UAnimMontage* Montage, FName Section)
-{
-    if (MeshToPlay == nullptr || Montage == nullptr)
-        return;
 
-    MeshToPlay->GetAnimInstance()->Montage_Play(Montage);
-    if (Section != "None")
-    {
-        MeshToPlay->GetAnimInstance()->Montage_JumpToSection(Section);
-    }
-}
 
 void ASoulsPlayerCharacter::Server_TryChargeAttack_Implementation()
 {
