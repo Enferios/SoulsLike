@@ -35,8 +35,8 @@ public:
 
 	void ClearTarget();
 
-	void Attack();
-	void Attack_Implementation();
+	void SelectAttack();
+	void SelectAttack_Implementation();
 
 protected:
 

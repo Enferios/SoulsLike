@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
+#include "DataTypes/AICombatMode.h"
+
 #include "EnemyCharacterInterface.generated.h"
 
 // This class does not need to be modified.
@@ -27,8 +30,20 @@ public:
 	void ClearTarget();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void Attack();
+	void SelectAttack();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Taunt();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void StartAttackTrace();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void StopAttackTrace();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetCombatMode(EAICombatMode NewMode);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SpawnProjectile();
 };

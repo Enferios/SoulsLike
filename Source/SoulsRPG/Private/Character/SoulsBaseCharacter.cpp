@@ -4,6 +4,7 @@
 #include "Character/SoulsBaseCharacter.h"
 
 #include "Components/SceneComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #include "Animation/HumanAnimInstance.h"
@@ -105,7 +106,42 @@ void ASoulsBaseCharacter::OnRep_bIsRolling()
 
 void ASoulsBaseCharacter::Death()
 {
+	Multicast_SetupDeathCollision();
 }
 
+FAttackMontage ASoulsBaseCharacter::GetRandomMontage(TArray<FAttackMontage> Montages)
+{
+	if (Montages.Num() <= 0)
+		return FAttackMontage();
 
+	int32 MaxRange = Montages.Num() - 1;
+	int32 MontageIndex = FMath::RandRange(0, MaxRange);
 
+	if (Montages[MontageIndex].Montage != nullptr)
+		return Montages[MontageIndex];
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BaseCharacter->GetRandomMontage() : montage is not valid!"));
+	}
+
+	return FAttackMontage();
+}
+
+bool ASoulsBaseCharacter::CheckPercentChance(float SuccessPercent)
+{
+	if (SuccessPercent == 0.f)
+		return false;
+
+	float RandomPercent = FMath::RandRange(0.f, 100.f);
+	if (RandomPercent <= SuccessPercent)
+		return true;
+
+	else
+		return false;
+}
+
+void ASoulsBaseCharacter::Multicast_SetupDeathCollision_Implementation()
+{
+	GetCapsuleComponent()->SetCollisionProfileName("Ragdoll");
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+}

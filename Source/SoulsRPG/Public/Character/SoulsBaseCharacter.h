@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 
+#include "DataTypes/AttackMontage.h"
+
 #include "SoulsBaseCharacter.generated.h"
 
 class UHumanAnimInstance;
@@ -83,4 +85,13 @@ public:
 	UFUNCTION()
 	virtual void Death();
 
+protected:
+
+	UFUNCTION()
+	virtual FAttackMontage GetRandomMontage(TArray<FAttackMontage> Montages);
+
+	bool CheckPercentChance(float SuccessPercent);
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	void Multicast_SetupDeathCollision();
 };

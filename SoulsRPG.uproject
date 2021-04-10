@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.26",
+	"EngineAssociation": "{2AF2E961-4949-E4C0-CE09-88A14E853BFC}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -13,6 +13,16 @@
 				"UMG",
 				"AIModule"
 			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "Water",
+			"Enabled": true
+		},
+		{
+			"Name": "ShallowWater",
+			"Enabled": true
 		}
 	]
 }

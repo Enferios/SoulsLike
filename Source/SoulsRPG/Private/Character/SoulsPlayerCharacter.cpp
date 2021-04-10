@@ -52,6 +52,8 @@ ASoulsPlayerCharacter::ASoulsPlayerCharacter()
     bIsSprinting = false;
    
     WeaponMode = ECharacterWeaponMode::CWM_None;
+
+    Tags.Add("Player");
 }
 
 void ASoulsPlayerCharacter::BeginPlay()

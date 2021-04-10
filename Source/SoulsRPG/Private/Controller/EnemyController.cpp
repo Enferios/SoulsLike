@@ -55,7 +55,7 @@ void AEnemyController::LookAtTarget()
 	}
 }
 
-void AEnemyController::Attack_Implementation()
+void AEnemyController::SelectAttack_Implementation()
 {
-	IEnemyCharacterInterface::Execute_Attack(GetPawn());
+	IEnemyCharacterInterface::Execute_SelectAttack(GetPawn());
 }

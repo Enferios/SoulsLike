@@ -27,6 +27,6 @@ public:
 	void SetTarget(AActor* NewTarget);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Enemy Controller Interface")
-	void Attack();
+	void SelectAttack();
 
 };

@@ -68,7 +68,7 @@ void UCharacterStatsComponent::ChangeHealth(float Amount, bool IsCurrent)
 			Stats.HealthMax = 0;
 	}
 
-	
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString().SanitizeFloat(Stats.HealthCurrent));
 }
 
 void UCharacterStatsComponent::Death()

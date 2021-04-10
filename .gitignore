@@ -79,6 +79,7 @@ DerivedDataCache/*
 
 *.uasset
 *.umap
+Content/*
 !Content/SoulsRPG/Blueprints/**/*.uasset
 
 ### UnrealEngine Patch ###
