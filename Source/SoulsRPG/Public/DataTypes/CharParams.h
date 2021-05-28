@@ -3,25 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Engine/DataTable.h"
 
-#include "DataTypes/ItemType.h"
-#include "DataTypes/WeaponStats.h"
+#include "CharParams.generated.h"
 
-#include "ItemInfo.generated.h"
+class USkeletalMeshComponent;
 
-class AMaster_Item;
 USTRUCT(Blueprintable)
-struct FItemInfo : public FTableRowBase
+struct FCharParams : public FTableRowBase
 {
     GENERATED_BODY()
+
 public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EItemType Type;
+    int32 Id;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSubclassOf<AMaster_Item> ItemClass;
-   
+    FString Name;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FWeaponStats WeaponStats;
+    USkeletalMeshComponent* SkeletalMesh;
+
 };

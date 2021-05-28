@@ -7,17 +7,18 @@
 #include "GameFramework/DamageType.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 
 
 #include "Character/SoulsBaseCharacter.h"
-
+#include "Character/BaseCharacterInterface.h"
+#include "DataTypes/WeaponStats.h"
 AWeaponMelee::AWeaponMelee()
 {
-
-
-   // SetActorTickEnabled(false);
+    CurrentCombo = 0;
+    ComboCounterClearDelay = 2.f;
 
     bIsTracingEnabled = false;
     TraceInterval = 0.01;
@@ -33,7 +34,7 @@ AWeaponMelee::AWeaponMelee()
 
 void AWeaponMelee::BeginPlay()
 {
-
+    Super::BeginPlay();
 }
 
 
@@ -119,5 +120,66 @@ void AWeaponMelee::ClearHittedActors()
 {
     AlreadyHittedActors.Empty();
     AlreadyHittedActors.Add(ItemOwner);
+}
+
+void AWeaponMelee::PlayAttackSound_Implementation()
+{
+    USoundCue* AttackSound = GetRandomFromArray(ItemInfo.WeaponStats.AttackSounds);
+
+    if (AttackSound)
+    {
+        FVector Location = GetActorLocation();
+
+        UGameplayStatics::PlaySoundAtLocation(this, AttackSound, Location);
+    }
+}
+
+void AWeaponMelee::Attack_Implementation(bool IsHeavyAttack)
+{
+    
+
+    TArray<UAnimMontage*> AttackArray;
+    if (IsHeavyAttack)
+    {
+        AttackArray = ItemInfo.WeaponStats.PowerAttacks;
+    }
+    else
+    {
+        AttackArray = ItemInfo.WeaponStats.BasicAttacks;
+    }
+    if (ItemOwner)
+    {
+        if (AttackArray.Num() == 0)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "Empty array!");
+            return;
+        }
+            
+        if (CurrentCombo > AttackArray.Num() - 1)
+        {
+            CurrentCombo = 0;
+        }
+
+        UAnimMontage* AttackMontage = AttackArray[CurrentCombo];
+        if (AttackMontage)
+        {
+            IBaseCharacterInterface::Execute_Server_PlayMontage(ItemOwner, AttackMontage);
+        } 
+    }
+
+    IncrementComboCounter();
+}
+
+void AWeaponMelee::IncrementComboCounter()
+{
+    ++CurrentCombo;
+
+    GetWorld()->GetTimerManager().SetTimer(ComboTimer, this, 
+        &AWeaponMelee::ClearComboCounter, 0.f, false, ComboCounterClearDelay);
+}
+
+void AWeaponMelee::ClearComboCounter()
+{
+    CurrentCombo = 0;
 }
 

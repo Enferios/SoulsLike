@@ -28,16 +28,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ASoulsBaseCharacter* ItemOwner;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	FItemInfo ItemInfo;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	virtual void Server_TryEnableCombatTracing();

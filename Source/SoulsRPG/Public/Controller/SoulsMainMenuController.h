@@ -9,9 +9,24 @@
 /**
  * 
  */
+class UMainMenuOverlayWidget;
+
 UCLASS()
 class SOULSRPG_API ASoulsMainMenuController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
+	TSubclassOf<UMainMenuOverlayWidget> OverlayWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
+	UMainMenuOverlayWidget* OverlayWidget;
 	
+protected:
+
+	void BeginPlay() override;
+
+	void InitOverlayWidget();
 };

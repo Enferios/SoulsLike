@@ -15,10 +15,13 @@
  * 
  */
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCombatStateChange, bool, InCombat);
+
 class USpringArmComponent;
 class UCameraComponent;
 class ASoulsPlayerController;
 class UInteractionComponent;
+class USoundCue;
 
 UCLASS()
 class SOULSRPG_API ASoulsPlayerCharacter : public ASoulsBaseCharacter,
@@ -32,11 +35,12 @@ public:
 
 	bool bMovementEnabled;
 	bool bInputEnabled;
+	bool bIsInCombat;
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsMoving, BlueprintReadOnly)
 	bool bIsMoving;
 
-	UPROPERTY(ReplicatedUsing = OnRep_WeaponMode, VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponMode, VisibleAnywhere, BlueprintReadOnly, Category = "Character|Combat")
 	ECharacterWeaponMode WeaponMode;
 
 	float TurnRate;
@@ -48,23 +52,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* FollowCamera;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Animation")
 	UAnimMontage* PickupMontage;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Animation")
 	UAnimMontage* RollingMontage;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Animation")
 	UAnimMontage* AttackChargingMontage;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
-	UAnimMontage* AttackLightMontage;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
-	UAnimMontage* AttackHeavyMontage;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Animation")
 	UAnimMontage* WeaponDrawMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Animation")
+	UAnimMontage* HitMontage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UInteractionComponent* InteractionComponent;
@@ -72,13 +73,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "References")
 	ASoulsPlayerController* PlayerController;
 
-	UPROPERTY(ReplicatedUsing = OnRep_EquippedItems, VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TMap<TEnumAsByte<EPhysicalSurface>, USoundCue*> FootstepSounds;
+
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedItems, VisibleAnywhere, BlueprintReadOnly, Category = "Character|Equipment")
 	FCharacterEquippedItems EquippedItems;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCombatStateChange OnCombatStateChange;
 
 
 public:
 
-	void BeginPlay() override;
+	
 
 	void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
@@ -169,6 +176,25 @@ public:
 	void UnequipWeaponNotify();
 	void UnequipWeaponNotify_Implementation();
 	
+	void FootstepNotify_Implementation();
+
 	UFUNCTION(Server, Reliable)
 	void Server_TrySetWeaponMode(ECharacterWeaponMode NewMode);
+
+	void PlayFootstepSound(EPhysicalSurface SurfaceType, FVector Location);
+
+	void PlayAttackSound();
+	virtual void PlayAttackSound_Implementation();
+
+	void BlockPlayerInput();
+	void BlockPlayerInput_Implementation();
+
+	void EnablePlayerInput();
+	void EnablePlayerInput_Implementation();
+
+protected:
+
+	void BeginPlay() override;
+
+	void PlayHitMontage() override;
 };

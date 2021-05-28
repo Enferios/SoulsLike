@@ -3,6 +3,8 @@
 
 #include "GameplayMechanics/Items/Master_Item.h"
 
+#include "Net/UnrealNetwork.h"
+
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -33,6 +35,13 @@ void AMaster_Item::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AMaster_Item::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMaster_Item, ItemInfo);
 }
 
 void AMaster_Item::Server_TryEnableCombatTracing_Implementation()

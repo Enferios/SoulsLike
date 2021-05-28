@@ -35,15 +35,25 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void EquipItem(const FItemInfo& Item);
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Character Interface")
 	void EnableAttackCollision();
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Character Interface")
 	void DisableAttackCollision();
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Character Interface")
 	void EquipWeaponNotify();
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Character Interface")
 	void UnequipWeaponNotify();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Character Interface")
+	void PlayAttackSound();
+
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Character Interface")
+	void BlockPlayerInput();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player Character Interface")
+	void EnablePlayerInput();
 };

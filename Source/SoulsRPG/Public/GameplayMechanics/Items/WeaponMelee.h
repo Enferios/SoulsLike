@@ -11,7 +11,6 @@
  */
 
 class USceneComponent;
-class AActor;
 
 UCLASS()
 class SOULSRPG_API AWeaponMelee : public AWeaponBase
@@ -25,9 +24,14 @@ private:
 
 	bool bIsTracingEnabled;
 
+	/** Delay in seconds before the combo counter will be cleared */
+	float ComboCounterClearDelay;
+
 	/** Interval between CombatCollisionTrace() calls */
 	float TraceInterval;
 	int32 PointsCount;
+
+	int32 CurrentCombo;
 
 
 	USceneComponent* TraceStartSocket;
@@ -39,6 +43,7 @@ private:
 	TArray<FVector> PointsOld;
 
 	FTimerHandle AttackTraceTimer;
+	FTimerHandle ComboTimer;
 
 public:
 
@@ -49,6 +54,12 @@ public:
 	void SetPoints();
 	void InitPoints();
 
+	void PlayAttackSound_Implementation() override;
+
+	void Attack(bool IsHeavyAttack);
+	virtual void Attack_Implementation(bool IsHeavyAttack);
+
+	
 
 protected:
 
@@ -59,4 +70,9 @@ protected:
 
 	void ApplyDamage(AActor* Target) override;
 	void ClearHittedActors();
+
+private:
+
+	void IncrementComboCounter();
+	void ClearComboCounter();
 };

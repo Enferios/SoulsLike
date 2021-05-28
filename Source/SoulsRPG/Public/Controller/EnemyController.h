@@ -22,6 +22,8 @@ class SOULSRPG_API AEnemyController : public AAIController,
 
 public:
 
+	bool bIsInCombat;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI | Behavior Tree")
 	UBehaviorTree* BehaviorTree;
 
@@ -34,6 +36,7 @@ public:
 	void SetTarget_Implementation(AActor* NewTarget);
 
 	void ClearTarget();
+	void ClearTarget_Implementation();
 
 	void SelectAttack();
 	void SelectAttack_Implementation();

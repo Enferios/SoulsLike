@@ -12,3 +12,10 @@ AWeaponBase::AWeaponBase()
 void AWeaponBase::ApplyDamage(AActor* Target)
 {
 }
+
+void AWeaponBase::PlayAttackSound_Implementation()
+{
+
+}
+
+

@@ -7,12 +7,16 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "TimerManager.h"
 
 #include "GameplayMechanics/Interaction/InteractionComponent.h"
 #include "GameplayMechanics/Items/Master_Item.h"
 #include "GameplayMechanics/Stats/CharacterStatsComponent.h"
+#include "GameplayMechanics/Items/WeaponInterface.h"
 #include "Animation/HumanAnimInstance.h"
 #include "Controller/SoulsPlayerController.h"
 #include "HUD/GameOverlay.h"
@@ -47,6 +51,7 @@ ASoulsPlayerCharacter::ASoulsPlayerCharacter()
     TurnRate = 60.f;
     LookUpRate = 60.f;
 
+    bIsInCombat = false;
     bInputEnabled = true;
     bMovementEnabled = true;
     bIsSprinting = false;
@@ -65,6 +70,9 @@ void ASoulsPlayerCharacter::BeginPlay()
     PlayerController = Cast<ASoulsPlayerController>(GetController());
 
     CharacterStats->OnCharacterDeath.AddDynamic(this, &ASoulsPlayerCharacter::Death);
+
+    OnTakeAnyDamage.AddDynamic(this, &ASoulsPlayerCharacter::OnTakeDamage);
+    
 }
 
 void ASoulsPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -104,7 +112,7 @@ void ASoulsPlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty
 
 void ASoulsPlayerCharacter::MoveForward(float AxisValue)
 {
-    bool bCanMove = AxisValue != 0.f;
+    bool bCanMove = AxisValue != 0.f && CanMove();
 
     if (bCanMove)
     {
@@ -120,7 +128,7 @@ void ASoulsPlayerCharacter::MoveForward(float AxisValue)
 
 void ASoulsPlayerCharacter::MoveRight(float AxisValue)
 {
-    bool bCanMove = AxisValue != 0.f;
+    bool bCanMove = AxisValue != 0.f && CanMove();
 
     if (bCanMove)
     {
@@ -182,7 +190,7 @@ void ASoulsPlayerCharacter::SpacebarKeyPressed()
 
 void ASoulsPlayerCharacter::FKeyPressed()
 {
-    if (bInputEnabled)
+    if (bInputEnabled && CanMove())
     {
         Server_TryInteract();
     }
@@ -209,14 +217,14 @@ void ASoulsPlayerCharacter::LMBDown()
 
 void ASoulsPlayerCharacter::LMBUp()
 {
-
         Server_TryAttack();
 }
 
 
 bool ASoulsPlayerCharacter::CanMove()
 {
-    return true;
+    return bMovementEnabled &&
+           !CheckIsDead();
 }
 
 void ASoulsPlayerCharacter::Server_ActivateSprintMode_Implementation()
@@ -272,14 +280,8 @@ void ASoulsPlayerCharacter::Server_TryAttack_Implementation()
 
     if (bIsAttacking)
     {
-        if (bIsHeavyAttackCharged)
-        {
-            Multicast_PlayMontage(GetMesh(), AttackHeavyMontage, "None");
-        }
-        else
-        {
-            Multicast_PlayMontage(GetMesh(), AttackLightMontage, "None");
-        }
+
+            IWeaponInterface::Execute_Attack(EquippedItems.MainWeapon, bIsHeavyAttackCharged);
     }
 }
 
@@ -373,6 +375,8 @@ void ASoulsPlayerCharacter::Death()
 {
     Super::Death();
 
+    bMovementEnabled = false;
+
     if (DeathMontage)
     {
         Multicast_PlayMontage(GetMesh(), DeathMontage);
@@ -381,7 +385,10 @@ void ASoulsPlayerCharacter::Death()
 
 void ASoulsPlayerCharacter::OnRep_IsMoving()
 {
-    AnimInstance->bIsMoving = bIsMoving;
+    if (AnimInstance)
+    {
+        AnimInstance->bIsMoving = bIsMoving;
+    }
 }
 
 void ASoulsPlayerCharacter::Server_CheckIsMoving_Implementation()
@@ -416,4 +423,68 @@ void ASoulsPlayerCharacter::Server_TrySetWeaponMode_Implementation(ECharacterWea
             break;
     }
 
+}
+
+void ASoulsPlayerCharacter::FootstepNotify_Implementation()
+{
+    FHitResult HitResult;
+    FVector Start = GetActorLocation();
+    FVector End = Start + FVector(0.f, 0.f, -200.f);
+    FCollisionQueryParams CollisionParams;
+    CollisionParams.bTraceComplex = true;
+    CollisionParams.bReturnPhysicalMaterial = true;
+
+    GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, CollisionParams);
+
+    if (HitResult.bBlockingHit && HitResult.PhysMaterial != nullptr)
+    {
+        
+       EPhysicalSurface Surface = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+
+        PlayFootstepSound(Surface, HitResult.Location);
+    }
+}
+
+void ASoulsPlayerCharacter::PlayFootstepSound(EPhysicalSurface SurfaceType, FVector Location)
+{
+   auto FootstepSoundPtr = FootstepSounds.Find(SurfaceType); //TODO make this work without double pointer
+   if (FootstepSoundPtr)
+   {
+       USoundCue* FootstepSound = *FootstepSoundPtr;
+       if (FootstepSound)
+       {
+          UGameplayStatics::PlaySoundAtLocation(this, FootstepSound, Location);
+       }
+   }
+}
+
+void ASoulsPlayerCharacter::PlayAttackSound_Implementation()
+{
+    auto Weapon = EquippedItems.MainWeapon;
+
+    if (EquippedItems.MainWeapon)
+    {
+        IWeaponInterface::Execute_PlayAttackSound(Weapon);
+    }
+}
+
+void ASoulsPlayerCharacter::BlockPlayerInput_Implementation()
+{
+    bMovementEnabled = false;
+}
+
+void ASoulsPlayerCharacter::EnablePlayerInput_Implementation()
+{
+    bMovementEnabled = true;
+}
+
+void ASoulsPlayerCharacter::PlayHitMontage()
+{
+    GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "Hit!");
+    if (HitMontage)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "Hit!");
+
+        Multicast_PlayMontage(GetMesh(), HitMontage);
+    }
 }

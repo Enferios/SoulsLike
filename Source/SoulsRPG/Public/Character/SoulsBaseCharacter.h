@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 
 #include "DataTypes/AttackMontage.h"
+#include "Character/BaseCharacterInterface.h"
 
 #include "SoulsBaseCharacter.generated.h"
 
@@ -15,7 +16,8 @@ class UCharacterStatsComponent;
 class UAnimMontage;
 
 UCLASS()
-class SOULSRPG_API ASoulsBaseCharacter : public ACharacter
+class SOULSRPG_API ASoulsBaseCharacter : public ACharacter,
+	public IBaseCharacterInterface
 {
 	GENERATED_BODY()
 
@@ -24,6 +26,9 @@ public:
 	ASoulsBaseCharacter();
 
 	bool bIsAttacking;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	bool bIsDead;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsHeavyAttackCharged;
@@ -34,19 +39,19 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_bIsSprinting)
 	bool bIsSprinting;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Animation")
 	UHumanAnimInstance* AnimInstance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Equipment")
 	USceneComponent* TwoHandedWeaponEquipSocket;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Equipment")
 	USceneComponent* TwoHandedWeaponHandSocket;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Stats")
 	UCharacterStatsComponent* CharacterStats;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Animation")
 	UAnimMontage* DeathMontage;
 
 protected:
@@ -61,6 +66,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void Server_PlayMontage(UAnimMontage* Montage);
+	void Server_PlayMontage_Implementation(UAnimMontage* Montage);
 
 	/** Uses for playing animation montages on all clients */
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
@@ -85,6 +93,21 @@ public:
 	UFUNCTION()
 	virtual void Death();
 
+	bool CheckIsDead();
+	bool CheckIsDead_Implementation();
+
+	/** Calls when character mesh make step in animation */
+	void FootstepNotify();
+	virtual void FootstepNotify_Implementation();
+
+	/** Calls when character gets hit */
+	UFUNCTION()
+		virtual void PlayHitMontage();
+
+	void OnTakeDamage(AActor* DamagedActor, float Damage,
+	const class UDamageType* DamageType, class AController* InstigatedBy,
+	AActor* DamageCauser);
+
 protected:
 
 	UFUNCTION()
@@ -94,4 +117,8 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
 	void Multicast_SetupDeathCollision();
+
+
+
+
 };

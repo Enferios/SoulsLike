@@ -25,6 +25,8 @@ ASoulsBaseCharacter::ASoulsBaseCharacter()
 	TwoHandedWeaponHandSocket->SetupAttachment(GetMesh(), "RHandSocket");
 
 	CharacterStats = CreateDefaultSubobject<UCharacterStatsComponent>(TEXT("CharacterStats"));
+
+	bIsDead = false;
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +35,8 @@ void ASoulsBaseCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	AnimInstance = Cast<UHumanAnimInstance>(GetMesh()->GetAnimInstance());
+
+
 }
 
 // Called every frame
@@ -55,6 +59,11 @@ void ASoulsBaseCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>&
 
 	DOREPLIFETIME(ASoulsBaseCharacter, bIsSprinting);
 	DOREPLIFETIME(ASoulsBaseCharacter, bIsRolling);
+}
+
+void ASoulsBaseCharacter::Server_PlayMontage_Implementation(UAnimMontage* Montage)
+{
+	Multicast_PlayMontage(GetMesh(), Montage);
 }
 
 // TODO make mesh implemented inside the function instead
@@ -106,7 +115,14 @@ void ASoulsBaseCharacter::OnRep_bIsRolling()
 
 void ASoulsBaseCharacter::Death()
 {
+	bIsDead = true;
+
 	Multicast_SetupDeathCollision();
+}
+
+bool ASoulsBaseCharacter::CheckIsDead_Implementation()
+{
+	return bIsDead;
 }
 
 FAttackMontage ASoulsBaseCharacter::GetRandomMontage(TArray<FAttackMontage> Montages)
@@ -144,4 +160,24 @@ void ASoulsBaseCharacter::Multicast_SetupDeathCollision_Implementation()
 {
 	GetCapsuleComponent()->SetCollisionProfileName("Ragdoll");
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+}
+
+void ASoulsBaseCharacter::FootstepNotify_Implementation()
+{
+
+}
+
+void ASoulsBaseCharacter::PlayHitMontage()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "Hit!");
+}
+
+void ASoulsBaseCharacter::OnTakeDamage(AActor* DamagedActor, float Damage,
+	const class UDamageType* DamageType, class AController* InstigatedBy,
+	AActor* DamageCauser)
+{
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "Hit!");
+
+	PlayHitMontage();
 }

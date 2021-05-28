@@ -29,4 +29,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Enemy Controller Interface")
 	void SelectAttack();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Enemy Controller Interface")
+	void ClearTarget();
+
 };

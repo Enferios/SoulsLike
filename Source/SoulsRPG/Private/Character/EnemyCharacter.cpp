@@ -13,6 +13,7 @@
 
 #include "Controller/EnemyController.h"
 #include "Controller/EnemyControllerInterface.h"
+#include "Character/BaseCharacterInterface.h"
 #include "GameplayMechanics/AIMechanics/BaseProjectile.h"
 #include "GameplayMechanics/Stats/CharacterStatsComponent.h"
 
@@ -45,7 +46,11 @@ void AEnemyCharacter::BeginPlay()
 
 void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 {
-    if (Pawn && CurrentTarget == nullptr)
+    if (Pawn == nullptr)
+        return;
+
+    bool bIsDeadTarget = IBaseCharacterInterface::Execute_CheckIsDead(Pawn);
+    if (CurrentTarget == nullptr && !bIsDeadTarget)
     {
         SetTarget(Pawn);
         IEnemyControllerInterface::Execute_SetTarget(GetController(), Pawn);
@@ -155,13 +160,10 @@ float AEnemyCharacter::GetDistanceToTarget()
 
 void AEnemyCharacter::SetCombatMode_Implementation(EAICombatMode NewMode)
 {
+    if (CombatMode == NewMode)
+        return;
+
     CombatMode = NewMode;
-    if (CombatMode == EAICombatMode::AICM_Melee)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, "Melee");
-    }
-    else
-        GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, "Ranged");
 }
 
 void AEnemyCharacter::SpawnProjectile_Implementation()

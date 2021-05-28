@@ -14,7 +14,6 @@ void AEnemyController::BeginPlay()
 	if (BehaviorTree)
 	{
 		RunBehaviorTree(BehaviorTree);
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "BT init succeed");
 	}
     
 }
@@ -23,19 +22,27 @@ void AEnemyController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	LookAtTarget();
+	if (bIsInCombat)
+	{
+		LookAtTarget();
+	}
 }
 
 void AEnemyController::SetTarget_Implementation(AActor* NewTarget)
 {
 	CurrentTarget = NewTarget;
+
+	bIsInCombat = true;
 }
 
-void AEnemyController::ClearTarget()
+void AEnemyController::ClearTarget_Implementation()
 {
 	CurrentTarget = nullptr;
 
+	bIsInCombat = false;
+
 	IEnemyCharacterInterface::Execute_ClearTarget(GetPawn());
+
 }
 
 void AEnemyController::LookAtTarget()
